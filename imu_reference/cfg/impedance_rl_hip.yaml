@@ -1,0 +1,79 @@
+# Bilateral hip impedance control, TCN policy + Muse thigh IMUs.
+# Run: python main_hip.py cfg/impedance_rl_hip.yaml   (key reference: README)
+
+# ---- trial ----
+trial_name: "261009_pilot_sim_Rajiv_2"   # log: logged_data/<trial_name>.npz (overwritten)
+exo_on: true                # false = zero torque
+trigger_type: "mocap"       # typing | mocap
+side: "both"                 # bilateral policy: keep both
+scale: 0.6                   # assistance gain
+torque_limit: 12.0           # Nm, hard clamp
+controller_name: "impedance_rl_hip"
+exp_time_sec: 380            # s logged
+fs: 100                      # Hz, trained rate
+
+# ---- body mass ----
+subject_mass: 74.5           # kg
+model_mass: 74.5             # kg, training model
+
+# ---- policy model ----
+trt_engine_path: "../tcn_model/hip_test_thighang_thighangvel.trt"   # + .meta.json
+input_size: 4                # must match engine meta.json
+model_angle_source: "thigh"  # thigh (Muse) | hip (encoders)
+frame_length: 95             # samples per window
+output_size: 4               # K_r, dq_r, K_l, dq_l
+
+# ---- impedance law (training: q_ref_min 40, q_ref_max -20) ----
+hip_max_torque: 22.0         # Nm, tanh knee, not a gain
+K_max: 60.0                  # Nm/rad
+K_min: 0.0                   # Nm/rad
+q_ref_min: 60.0              # deg, flexion reference
+q_ref_max: -40.0             # deg, extension reference
+flex_K_mult: 1.0             # flexion stiffness multiplier
+gait_sigma: 0.3              # gait-weight width
+rate_max: 20.0               # 1/s, gait command slew limit
+
+# ---- filters (s) ----
+hip_filter_tau: 0.05         # hip angle, control law only
+impedance_filter_tau: 0.05   # K
+gait_filter_tau: 0.1         # gait command
+output_filter_tau: 0.05      # torque
+
+# ---- motor mounting ----
+hip_sign_r: 1.0
+hip_sign_l: -1.0             # left reversed
+torque_sign_r: 1.0
+torque_sign_l: -1.0          # left reversed
+hip_offset_deg_r: 0.0        # deg, encoder zero offset
+hip_offset_deg_l: 0.0
+
+# ---- Muse IMUs (other settings: DEFAULTS in utils/Header_MuseIMU.py) ----
+imu_type: "muse"
+muse_axis: "y"               # thigh angle axis
+muse_axis_sign_r: 1.0        # flexion +
+muse_axis_sign_l: -1.0       # flexion +
+muse_gyro_axis: "z"          # thigh velocity axis
+muse_gyro_sign_r: 1.0        # flexion +
+muse_gyro_sign_l: -1.0       # flexion +
+muse_devices:                # side = thigh the IMU is worn on
+  right:                     # muse_2
+    address: "00:80:E1:27:20:14"
+    adapter_mac: "A0:AD:9F:7A:18:48"
+    angle_offset_deg: 0.0    # fixed offset before auto-zero
+  left:                      # muse_1
+    address: "00:80:E1:27:2D:56"
+    adapter_mac: "A0:AD:9F:7A:10:42"
+    angle_offset_deg: 0.0
+
+# ---- motors ----
+can_channel: "can0"
+can_id_L: 3
+can_id_R: 2
+motor_type: "AK80-9"
+
+# ---- sync ----
+GPIO_OUTPUT_PIN: 7           # board pin
+PULSE_WIDTH_SEC: 0.2
+GPIO_START_DELAY_SEC: 2.0    # first pulse after start
+mocap_server_ip: "172.24.44.177"   # trigger_type: mocap
+mocap_server_port: 10
