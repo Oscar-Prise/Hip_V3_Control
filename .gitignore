@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+
+# Trial data written by main_hip.py into logged_data/
+*.npz
+
+# Written into the CWD by the vendored actuator driver at import time
+motorlog.log

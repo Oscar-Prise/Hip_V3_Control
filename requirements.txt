@@ -1,0 +1,6 @@
+# Python dependencies used by the control runtime. Jetson.GPIO comes from the
+# JetPack system image.
+numpy==1.26.1
+python-can==4.6.1
+PyYAML==5.4.1
+typing_extensions==4.15.0

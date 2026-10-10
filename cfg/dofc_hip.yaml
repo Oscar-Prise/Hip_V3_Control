@@ -1,0 +1,40 @@
+# Delayed output feedback control (DOFC): model-free, encoders only.
+# Run: python main_hip.py cfg/dofc_hip.yaml   (key reference: README)
+
+# ---- trial ----
+trial_name: "261009_pilot_dofc_Rajiv_2"    # log: logged_data/<trial_name>.npz (overwritten)
+exo_on: true                 # false = zero torque
+trigger_type: "mocap"       # typing | mocap
+side: "both"
+scale: 1.2                    # assistance gain (0 = no torque)
+torque_limit: 12.0           # Nm, hard clamp
+controller_name: "dofc_hip"
+exp_time_sec: 380            # s logged
+fs: 100                      # Hz
+
+# ---- DOFC ----
+kappa: 10.0                  # Nm per unit sin() difference, magnitude
+delay: 0.20                  # s, phase
+lpf_tau: 0.05                # s, hip angle filter
+hip_max_torque: 10.0         # Nm, internal clamp
+
+# ---- motor mounting ----
+hip_sign_r: 1.0
+hip_sign_l: -1.0             # left reversed
+torque_sign_r: 1.0
+torque_sign_l: -1.0          # left reversed
+hip_offset_deg_r: 0.0        # deg, encoder zero offset
+hip_offset_deg_l: 0.0
+
+# ---- motors ----
+can_channel: "can0"
+can_id_L: 3
+can_id_R: 2
+motor_type: "AK80-9"
+
+# ---- sync ----
+GPIO_OUTPUT_PIN: 7           # board pin
+PULSE_WIDTH_SEC: 0.2
+GPIO_START_DELAY_SEC: 2.0    # first pulse after start
+mocap_server_ip: "172.24.44.177"   # trigger_type: mocap
+mocap_server_port: 10
